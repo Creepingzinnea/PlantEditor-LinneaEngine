@@ -8,7 +8,7 @@ Requirements:
 Running the Program:
 - Navigate to the Bin folder: PlantEditor-LinneaEngine\Bin
 - Run the executable: Game_Release.exe
-- Optionally .sln is inlcuded in the repository for tech savvy people
+- Optionally, the Visual Studio solution (.sln) is included for those who want to explore.
 
 
 
