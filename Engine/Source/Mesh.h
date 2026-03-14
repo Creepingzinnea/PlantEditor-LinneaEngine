@@ -3,6 +3,7 @@
 #include <Matrix4x4.hpp>
 #include <string>
 #include <vector>
+#include <memory>
 #include "Transform.h"
 #include "Texture.h"
 
