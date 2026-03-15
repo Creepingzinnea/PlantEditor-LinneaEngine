@@ -4,8 +4,10 @@
 
 struct sPlantParams
 {
-    CommonUtilities::Vector3<float> rotationB = { -20.0f, -20.0f, -20.0f };
     CommonUtilities::Vector3<float> rotationA = { 20.0f, 20.0f, 20.0f };
+    CommonUtilities::Vector3<float> rotationB = { -20.0f, -20.0f, -20.0f };
+    CommonUtilities::Vector3<float> intermediateRotationA = { 20.0f, 20.0f, 20.0f };
+    CommonUtilities::Vector3<float> intermediateRotationB = { -20.0f, -20.0f, -20.0f };
     LSystem lSystem;
 
     //initial

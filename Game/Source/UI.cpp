@@ -634,7 +634,7 @@ void UI::Presets(Plant* aPlant)
 				if (ImGui::Selectable(label.c_str()))
 				{
 					postponeOneframe = true;
-					aPlant->UpdatePreset(label);
+					aPlant->LoadPreset(label);
 				}
 			}
 			ImGui::EndCombo();

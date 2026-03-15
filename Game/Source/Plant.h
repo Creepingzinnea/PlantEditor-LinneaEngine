@@ -23,7 +23,7 @@ public:
     void SetLeafRandomScale();
     void SetLeafMaterial(std::string& aMaterialName, GraphicsEngine* aGraphicsEnginePtr);
     void Update();
-    void UpdatePreset(const std::string& aPreset);
+    void LoadPreset(const std::string& aPreset);
     void FullUpdate();
 #ifdef _DEBUG
     void ImGuiLeafTransform();

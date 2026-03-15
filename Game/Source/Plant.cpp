@@ -23,6 +23,8 @@ void Plant::Update()
 	else
 	{
 		myPlantData.leafPoolCounter = 0;
+		myParams.intermediateRotationA = myParams.rotationA;
+		myParams.intermediateRotationB = myParams.rotationB;
 		ProcessLSystem(false);
 		myRoot.ResetNodeChildCounter();
 		myRoot.ResetNodeLeafCounter();
@@ -32,14 +34,15 @@ void Plant::Update()
 	myStateChanged = false;
 }
 
-void Plant::UpdatePreset(const std::string& aPreset)
+void Plant::LoadPreset(const std::string& aPreset)
 {
 	myStateChanged = true;
 	myFullReset = true;
-
 	mySelectedPreset = aPreset;
 	myPreset = myPresets[aPreset];
 	myParams = myPreset;
+	myParams.intermediateRotationA = myParams.rotationA;
+	myParams.intermediateRotationB = myParams.rotationB;
 }
 
 void Plant::FullUpdate()
@@ -70,6 +73,8 @@ void Plant::Init(const std::string aFilePath, GraphicsEngine* aGraphicsEnginePtr
 	serialize.LoadPresets(aFilePath, myPresets);
 	myPreset = myPresets["preset1"];
 	myParams = myPreset;
+	myParams.intermediateRotationA = myParams.rotationA;
+	myParams.intermediateRotationB = myParams.rotationB;
 
 #ifdef _DEBUG
 	myPlantData.leafPool.resize(100, Leaf(myGraphicsEnginePtr, myParams.leafSize));
@@ -141,11 +146,11 @@ void Plant::ProcessLSystem(bool allocateNodes)
 			break;
 
 		case '+': // Rotate right
-			currentNode->myTransform.AddRotation(myParams.rotationA);
+			currentNode->myTransform.AddRotation(myParams.intermediateRotationA);
 			break;
 
 		case '-': // Rotate left
-			currentNode->myTransform.AddRotation(myParams.rotationB);
+			currentNode->myTransform.AddRotation(myParams.intermediateRotationB);
 			break;
 
 		case '[': // Open branch
@@ -211,22 +216,22 @@ void Plant::ProcessLSystem(bool allocateNodes)
 
 		case '&': // Swap rotation directions
 		{
-			vector3f tempRot = myParams.rotationA;
-			myParams.rotationA = myParams.rotationB;
-			myParams.rotationB = tempRot;
+			vector3f tempRot = myParams.intermediateRotationA;
+			myParams.intermediateRotationA = myParams.intermediateRotationB;
+			myParams.intermediateRotationB = tempRot;
 			break;
 		}
 
 		case '(': // Decrease rotation angle
-			myParams.rotationA.x -= myParams.additionalTurningAngleIncrement;
-			myParams.rotationA.y -= myParams.additionalTurningAngleIncrement;
-			myParams.rotationA.z -= myParams.additionalTurningAngleIncrement;
+			myParams.intermediateRotationA.x -= myParams.additionalTurningAngleIncrement;
+			myParams.intermediateRotationA.y -= myParams.additionalTurningAngleIncrement;
+			myParams.intermediateRotationA.z -= myParams.additionalTurningAngleIncrement;
 			break;
 
 		case ')': // Increase rotation angle
-			myParams.rotationA.x += myParams.additionalTurningAngleIncrement;
-			myParams.rotationA.y += myParams.additionalTurningAngleIncrement;
-			myParams.rotationA.z += myParams.additionalTurningAngleIncrement;
+			myParams.intermediateRotationA.x += myParams.additionalTurningAngleIncrement;
+			myParams.intermediateRotationA.y += myParams.additionalTurningAngleIncrement;
+			myParams.intermediateRotationA.z += myParams.additionalTurningAngleIncrement;
 			break;
 		default:
 			break;
@@ -306,6 +311,8 @@ void Plant::ClearTree()
 	myRoot.myChildren.clear();
 	myRoot.myVertexIndexes.clear();
 	myPlantData.leafPoolCounter = 0;
+	myParams.intermediateRotationA = myParams.rotationA;
+	myParams.intermediateRotationB = myParams.rotationB;
 }
 
 void Plant::CreateTipsForTerminalBranches(PlantNode* aNode, bool allocateVertices)
