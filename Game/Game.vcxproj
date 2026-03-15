@@ -128,6 +128,9 @@ gdi32.lib;
 kernel32.lib;Engine.lib;CommonUtilities-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)External\CommonUtilities\lib;$(SolutionDir)Lib\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PreBuildEvent>
+      <Command>xcopy /Y /S "$(SolutionDir)External\dll\*.dll" "$(OutDir)"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -151,6 +154,9 @@ gdi32.lib;
 kernel32.lib;Engine.lib;CommonUtilities.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)External\CommonUtilities\lib;$(SolutionDir)Lib\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PreBuildEvent>
+      <Command>xcopy /Y /S "$(SolutionDir)External\dll\*.dll" "$(OutDir)"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />

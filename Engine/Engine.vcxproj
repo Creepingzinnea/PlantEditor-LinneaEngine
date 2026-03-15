@@ -142,6 +142,10 @@
     <FxCompile>
       <ObjectFileOutput>$(SolutionDir)/Assets/Shaders/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -173,6 +177,10 @@
     <FxCompile>
       <ObjectFileOutput>$(SolutionDir)/Assets/Shaders/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\External\imgui_docking\backends\imgui_impl_dx11.h" />

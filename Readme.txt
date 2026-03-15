@@ -10,6 +10,13 @@ Running the Program:
 - Run the executable: Game_Release.exe
 - Optionally, the Visual Studio solution (.sln) is included for those who want to explore.
 
+Detailed dependencies:
+The project requires the following libraries for linking:
+
+- DirectX: d3d11.lib, dxguid.lib
+- Windows system libraries: kernel32.lib, user32.lib, gdi32.lib, winspool.lib, comdlg32.lib, advapi32.lib, shell32.lib, ole32.lib, oleaut32.lib, uuid.lib, odbc32.lib, odbccp32.lib
+
+
 
 
 
