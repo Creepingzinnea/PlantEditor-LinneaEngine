@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "GraphicsEngine.h"
 #include "TGPUtilities.hpp"
+#include "FileLogger.h"
 #include "Camera.h"
 #include "Terrain.h"
 #include "Timer.h"
@@ -14,44 +15,44 @@ bool GraphicsEngine::Initialize(CommonUtilities::Timer* aTimerPtr)
 {
 	if (!InitializeSwapChain(*WindowHandler::GetInstance().GetWindowHandle()))
 	{
-		TGPUtilities::CustomdebugOutput("InitializeSwapChain() failed");
+		FileLogger::Get().LogError("InitializeSwapChain failed.");
 		return false;
 	}
 
 	if (!CreateBackBuffer())
 	{
-		TGPUtilities::CustomdebugOutput("CreateBackBuffer() failed");
+		FileLogger::Get().LogError("CreateBackBuffer failed.");
 		return false;
 	}
 
 	if (!CreateConstantBuffers())
 	{
-		TGPUtilities::CustomdebugOutput("CreateConstantBuffers() failed");
+		FileLogger::Get().LogError("CreateConstantBuffers failed.");
 		return false;
 	}
 
 	if (!CreateSamplerState())
 	{
-		TGPUtilities::CustomdebugOutput("CreateSamplerState() failed");
+		FileLogger::Get().LogError("CreateSamplerState failed.");
 		return false;
 	}
 
 
 	if (!CreateDepthBuffer())
 	{
-		TGPUtilities::CustomdebugOutput("CreateDepthBuffer() failed");
+		FileLogger::Get().LogError("CreateDepthBuffer failed.");
 		return false;
 	}
 
 	if (!CreateRasterizerStates())
 	{
-		TGPUtilities::CustomdebugOutput("CreateRasterizerStates() failed");
+		FileLogger::Get().LogError("CreateRasterizerStates failed.");
 		return false;
 	}
 
 	if (!CreateBlendStates())
 	{
-		TGPUtilities::CustomdebugOutput("CreateBlendState() failed");
+		FileLogger::Get().LogError("CreateBlendStates failed.");
 		return false;
 	}
 
@@ -109,21 +110,24 @@ bool GraphicsEngine::PreFrame()
 
 	if (FAILED(result))
 	{
-		TGPUtilities::CustomdebugOutput("ResizeBuffers() failed");
+		FileLogger::Get().LogError("ReziseBuffers failed.");
+		FileLogger::Get().Flush();
 		return false;
 	}
 
 	// Recreate the back buffer
 	if (!CreateBackBuffer())
 	{
-		TGPUtilities::CustomdebugOutput("CreateBackBuffer() failed");
+		FileLogger::Get().LogError("CreateBackBuffer failed");
+		FileLogger::Get().Flush();
 		return false;
 	}
 
 	// Recreate depth buffer with new size
 	if (!CreateDepthBuffer())
 	{
-		TGPUtilities::CustomdebugOutput("CreateDepthBuffer() failed");
+		FileLogger::Get().LogError("CreateDepthBuffer failed");
+		FileLogger::Get().Flush();
 		return false;
 	}
 
@@ -134,7 +138,8 @@ bool GraphicsEngine::PreFrame()
 	if (!CreateRenderTarget(&myIntermediateRenderTarget) ||
 		!CreateRenderTarget(&myMainRenderTarget))
 	{
-		TGPUtilities::CustomdebugOutput("CreateRenderTarget() failed");
+		FileLogger::Get().LogError("CreateRenderTarget failed");
+		FileLogger::Get().Flush();
 		return false;
 	}
 
@@ -158,7 +163,8 @@ bool GraphicsEngine::CreateBlendStates()
 	HRESULT result = myDevice->CreateBlendState(&blendDesc, myAlphaBlendState.GetAddressOf());
 	if (FAILED(result))
 	{
-		TGPUtilities::CustomdebugOutput("Failed to create alpha blend state");
+		FileLogger::Get().LogError("Failed to create alpha blend state. HRESULT: " + std::to_string(result));
+		FileLogger::Get().Flush();
 		return false;
 	}
 	
@@ -177,7 +183,8 @@ bool GraphicsEngine::CreateBlendStates()
 	result = myDevice->CreateBlendState(&opaqueBlendDesc, myOpaqueBlendState.GetAddressOf());
 	if (FAILED(result))
 	{
-		TGPUtilities::CustomdebugOutput("Failed to create opaque blend state");
+		FileLogger::Get().LogError("Failed to create opaque blend state. HRESULT: " + std::to_string(result));
+		FileLogger::Get().Flush();
 		return false;
 	}
 
@@ -206,7 +213,8 @@ bool GraphicsEngine::CreateRenderTarget(RenderTarget* aRenderTarget)
 	result = myDevice->CreateTexture2D(&desc, nullptr, &texture);
 	if (!SUCCEEDED(result))
 	{
-		TGPUtilities::CustomdebugOutput("Failed to create texture for render target");
+		FileLogger::Get().LogError("Failed to create render target. HRESULT: " + std::to_string(result));
+		FileLogger::Get().Flush();
 		return false;
 	}
 
@@ -220,7 +228,8 @@ bool GraphicsEngine::CreateRenderTarget(RenderTarget* aRenderTarget)
 
 	if (!SUCCEEDED(result))
 	{
-		TGPUtilities::CustomdebugOutput("Failed to create shader resource view for render target");
+		FileLogger::Get().LogError("Failed to create shader resource view for render target. HRESULT: " + std::to_string(result));
+		FileLogger::Get().Flush();
 		return false;
 	}
 
@@ -233,7 +242,8 @@ bool GraphicsEngine::CreateRenderTarget(RenderTarget* aRenderTarget)
 
 	if (!SUCCEEDED(result))
 	{
-		TGPUtilities::CustomdebugOutput("Failed to create render target view for render target");
+		FileLogger::Get().LogError("Failed to create render target view for render target. HRESULT: " + std::to_string(result));
+		FileLogger::Get().Flush();
 		return false;
 	}
 
@@ -379,10 +389,12 @@ void GraphicsEngine::SetRasterizerState(eRasteriserState aRasteriserState)
 	case eRasteriserState::frontCulling:
 	{
 		myContext->RSSetState(myFrontFaceCullingRasterizerState.Get());
+		break;
 	}
 	case eRasteriserState::backCulling:
 	{
 		myContext->RSSetState(myBackFaceCullingRasterizerState.Get());
+		break;
 	}
 	}
 }
@@ -436,7 +448,8 @@ void GraphicsEngine::PresentFrame()
 	HRESULT result = mySwapChain->Present(1, 0);
 	if (FAILED(result))
 	{
-		TGPUtilities::CustomdebugOutput("Failed to present the swap chain");
+		FileLogger::Get().LogWarning("Failed to present the swap chain. HRESULT: " + std::to_string(result));
+		FileLogger::Get().Flush();
 	}
 
 	myContext->ClearRenderTargetView(myBackBuffer.Get(), myBackgroundColor);
@@ -481,6 +494,12 @@ bool GraphicsEngine::InitializeSwapChain(HWND windowHandle)
 		&myContext
 	);
 
+	if (FAILED(result))
+	{
+		FileLogger::Get().LogError("D3D11CreateDeviceAndSwapChain failed. HRESULT: " + std::to_string(result));
+		return false;
+	}
+
 	return SUCCEEDED(result);
 }
 
@@ -490,6 +509,8 @@ bool GraphicsEngine::CreateBackBuffer()
 	HRESULT result = mySwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backBufferTexture);
 	if (FAILED(result))
 	{
+		FileLogger::Get().LogError("GetBuffer failed. HRESULT: " + std::to_string(result));
+		FileLogger::Get().Flush();
 		return false;
 	}
 
@@ -509,15 +530,32 @@ bool GraphicsEngine::CreateConstantBuffers()
 
 	bufferDescription.ByteWidth = sizeof(FrameBufferData);
 	HRESULT result = myDevice->CreateBuffer(&bufferDescription, nullptr, &myFrameBuffer);
-	if (FAILED(result)) return false;
+	if (FAILED(result))
+	{
+		FileLogger::Get().LogError("Failed to create frame buffer. HRESULT: " + std::to_string(result));
+		FileLogger::Get().Flush();
+		return false;
+	}
 
 	bufferDescription.ByteWidth = sizeof(ObjectBufferData);
 	result = myDevice->CreateBuffer(&bufferDescription, nullptr, &myObjectBuffer);
-	if (FAILED(result)) return false;
+	if (FAILED(result))
+	{
+		FileLogger::Get().LogError("Failed to create object buffer. HRESULT: " + std::to_string(result));
+		FileLogger::Get().Flush();
+		return false;
+	}
 
 	bufferDescription.ByteWidth = sizeof(TerrainBuffer);
 	result = myDevice->CreateBuffer(&bufferDescription, nullptr, &myTerrainBuffer);
-	return SUCCEEDED(result);
+	if (FAILED(result))
+	{
+		FileLogger::Get().LogError("Failed to create terrain buffer. HRESULT: " + std::to_string(result));
+		FileLogger::Get().Flush();
+		return false;
+	}
+
+	return true;
 }
 
 bool GraphicsEngine::CreateSamplerState()
@@ -532,7 +570,14 @@ bool GraphicsEngine::CreateSamplerState()
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
 	HRESULT result = myDevice->CreateSamplerState(&samplerDesc, &mySamplerState);
-	return SUCCEEDED(result);
+	if (FAILED(result))
+	{
+		FileLogger::Get().LogError("Failed to create sampler state. HRESULT: " + std::to_string(result));
+		FileLogger::Get().Flush();
+		return false;
+	}
+
+	return true;
 }
 
 bool GraphicsEngine::CreateDepthBuffer()
@@ -547,12 +592,23 @@ bool GraphicsEngine::CreateDepthBuffer()
 
 	ID3D11Texture2D* depthBufferTexture = nullptr;
 	HRESULT result = myDevice->CreateTexture2D(&depthBufferDesc, nullptr, &depthBufferTexture);
-	if (FAILED(result)) return false;
+	if (FAILED(result))
+	{
+		FileLogger::Get().LogError("Failed to create texture 2D. HRESULT: " + std::to_string(result));
+		FileLogger::Get().Flush();
+		return false;
+	}
 
 	result = myDevice->CreateDepthStencilView(depthBufferTexture, nullptr, &myDepthBuffer);
 	depthBufferTexture->Release();
+	if (FAILED(result))
+	{
+		FileLogger::Get().LogError("Failed to create depth stencil view. HRESULT: " + std::to_string(result));
+		FileLogger::Get().Flush();
+		return false;
+	}
 
-	return SUCCEEDED(result);
+	return true;
 }
 
 void GraphicsEngine::SetRenderTargetsAndViewport()
@@ -582,9 +638,10 @@ bool GraphicsEngine::CreateRasterizerStates()
 	(
 		&rasterizerDesc, &myFrontFaceCullingRasterizerState
 	);
-
 	if (FAILED(result))
 	{
+		FileLogger::Get().LogError("Failed to create front face culling razterizer state. HRESULT: " + std::to_string(result));
+		FileLogger::Get().Flush();
 		return false;
 	}
 
@@ -596,9 +653,10 @@ bool GraphicsEngine::CreateRasterizerStates()
 	(
 		&rasterizerDesc, &myBackFaceCullingRasterizerState
 	);
-
 	if (FAILED(result))
 	{
+		FileLogger::Get().LogError("Failed to create back face culling razterizer state. HRESULT: " + std::to_string(result));
+		FileLogger::Get().Flush();
 		return false;
 	}
 
@@ -610,9 +668,10 @@ bool GraphicsEngine::CreateRasterizerStates()
 	(
 		&rasterizerDesc, &myNoFaceCullingRasterizerState
 	);
-
 	if (FAILED(result))
 	{
+		FileLogger::Get().LogError("Failed to create no face culling razterizer state. HRESULT: " + std::to_string(result));
+		FileLogger::Get().Flush();
 		return false;
 	}
 
@@ -662,8 +721,8 @@ void GraphicsEngine::PrepareObjectBufferData(std::shared_ptr<Mesh> aMesh)
 void GraphicsEngine::PrepareTerrainBufferData(TerrainBuffer* someTerrainData)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
-	HRESULT hr = myContext->Map(myTerrainBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
-	if (SUCCEEDED(hr))
+	HRESULT result = myContext->Map(myTerrainBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
+	if (SUCCEEDED(result))
 	{
 		memcpy(mappedBuffer.pData, someTerrainData, sizeof(TerrainBuffer));
 		myContext->Unmap(myTerrainBuffer.Get(), 0);
@@ -671,6 +730,11 @@ void GraphicsEngine::PrepareTerrainBufferData(TerrainBuffer* someTerrainData)
 		// Sets cbuffer to slot 2
 		myContext->VSSetConstantBuffers(2, 1, myTerrainBuffer.GetAddressOf());
 		myContext->PSSetConstantBuffers(2, 1, myTerrainBuffer.GetAddressOf());
+	}
+	else
+	{
+		FileLogger::Get().LogWarning("Failed to map terrain buffer. HRESULT: " + std::to_string(result));
+		FileLogger::Get().Flush();
 	}
 }
 
@@ -681,8 +745,13 @@ bool GraphicsEngine::CreateDepthStencilStates()
 	defaultDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL; 
 	defaultDesc.DepthFunc = D3D11_COMPARISON_LESS; 
 	defaultDesc.StencilEnable = FALSE; 
-	HRESULT hr = myDevice->CreateDepthStencilState(&defaultDesc, myDefaultDepthStencilState.GetAddressOf());
-	if (FAILED(hr)) { return false; };
+	HRESULT result = myDevice->CreateDepthStencilState(&defaultDesc, myDefaultDepthStencilState.GetAddressOf());
+	if (FAILED(result))
+	{
+		FileLogger::Get().LogError("Failed to create default depth stencil state. HRESULT: " + std::to_string(result));
+		FileLogger::Get().Flush();
+		return false;
+	}
 
 
 	D3D11_DEPTH_STENCIL_DESC readOnlyDesc = {};
@@ -690,8 +759,13 @@ bool GraphicsEngine::CreateDepthStencilStates()
 	readOnlyDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 	readOnlyDesc.DepthFunc = D3D11_COMPARISON_LESS;
 	readOnlyDesc.StencilEnable = FALSE; 
-	hr = myDevice->CreateDepthStencilState(&readOnlyDesc, myReadOnlyDepthStencilState.GetAddressOf());
-	if (FAILED(hr)) { return false; };
+	result = myDevice->CreateDepthStencilState(&readOnlyDesc, myReadOnlyDepthStencilState.GetAddressOf());
+	if (FAILED(result))
+	{
+		FileLogger::Get().LogError("Failed to create read only depth stencil state. HRESULT: " + std::to_string(result));
+		FileLogger::Get().Flush();
+		return false;
+	}
 
 	return true;
 }

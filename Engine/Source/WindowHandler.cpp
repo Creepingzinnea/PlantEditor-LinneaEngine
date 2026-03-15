@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "../../Game/resource.h"
 #include <dwmapi.h>
+#include <string>
+#include "FileLogger.h"
 
 // Window procedure function to handle messages sent to the window----------------------------------
 LRESULT CALLBACK WndProc(HWND hWND, UINT message, WPARAM wParam, LPARAM lParam);
@@ -43,7 +45,13 @@ bool WindowHandler::Initialize(HINSTANCE aHinstance)
     wcex.hIconSm = LoadIcon(aHinstance, MAKEINTRESOURCE(IDI_SMALL));
 
     // Register the window class--------------------------------------------------------------------
-    RegisterClassExW(&wcex);
+    ATOM result = RegisterClassExW(&wcex);
+    if (!result)
+    {
+        DWORD error = GetLastError();
+        FileLogger::Get().LogError("RegisterClassExW failed. Error: " + std::to_string(error));
+        return false;
+    }
 
     // Create the window----------------------------------------------------------------------------
     myWindowHandle = CreateWindow
@@ -64,8 +72,12 @@ bool WindowHandler::Initialize(HINSTANCE aHinstance)
 
     if (!myWindowHandle) // Check if the window was created successfully--------------------------------------
     {
-        return 1; // Exit if window creation failed
+        DWORD error = GetLastError();
+        FileLogger::Get().LogError("Windowhandle is null after createWindow. Error: " + std::to_string(error));
+        return false;
     }
+
+    FileLogger::Get().Log("Window created. Width: " + std::to_string(myWidth) + "Height: " + std::to_string(myHeight));
 
     return true;
 }
@@ -84,6 +96,7 @@ LRESULT CALLBACK WndProc(HWND hWND, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_DESTROY:        // Handle the window destroy message
     {
+        FileLogger::Get().Log("WM_DESTROY received");
         PostQuitMessage(0); // Post a quit message to the message queue
         break;
     }
@@ -93,6 +106,9 @@ LRESULT CALLBACK WndProc(HWND hWND, UINT message, WPARAM wParam, LPARAM lParam)
         int newHeight = HIWORD(lParam);
 
         WindowHandler::GetInstance().Resize(newWidth, newHeight);
+
+        FileLogger::Get().Log("Window resized to " +std::to_string(newWidth) + "x" +std::to_string(newHeight));
+
         break;
     }
     default:

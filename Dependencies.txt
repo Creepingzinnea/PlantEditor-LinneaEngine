@@ -1,0 +1,8 @@
+user.3d.dll
+Kernel32.dll
+gdi32.dll 
+gdi.32.dll
+SHELL32.dll
+d3d11.dll
+D3DCOMPILER_47.dll
+IMM32.dll

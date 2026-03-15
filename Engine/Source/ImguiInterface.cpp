@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "ImguiInterface.h"
 #include "GraphicsEngine.h"
+#include "FileLogger.h"
 #include <backends/imgui_impl_dx11.h>
 #include <backends/imgui_impl_win32.h>
 
@@ -65,11 +66,15 @@ bool ImGuiInterface::Init(GraphicsEngine* aEngine, HWND& aWindowHandle)
 	assert(aWindowHandle != nullptr);
 	if (!ImGui_ImplWin32_Init(aWindowHandle))
 	{
+		FileLogger::Get().LogError("ImGui_ImplWin32_Init() failed");
+		FileLogger::Get().Flush();
 		return false;
 	}
 
 	if (!ImGui_ImplDX11_Init(aEngine->GetDevice().Get(), aEngine->GetDeviceContext().Get()))
 	{
+		FileLogger::Get().LogError("ImGui_ImplDX11_Init() failed");
+		FileLogger::Get().Flush();
 		return false;
 	}
 

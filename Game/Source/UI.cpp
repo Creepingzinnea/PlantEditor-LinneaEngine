@@ -6,7 +6,6 @@
 #include "ImguiInterface.h"
 #include "SerialisePlant.h"
 #include <imgui_docking/misc/cpp/imgui_stdlib.h>
-#include <filesystem>
 
 void UI::Render(const ImTextureID aTextureID, WaterPlane& aWaterPlane, Plant* aPlant)
 {

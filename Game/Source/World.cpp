@@ -2,6 +2,7 @@
 #include "World.h"
 #include "Camera.h"
 #include "TGPUtilities.hpp"
+#include "FileLogger.h"
 #include <InputManager.h>
 #include <thread>
 
@@ -71,9 +72,9 @@ bool World::Init(GraphicsEngine& aGraphicsEngine)
 	//rest of terrain
 	terrainThread.join();
 	myTerrain->LoadMaterial(myGraphicsEnginePtr);
-	TGPUtilities::CustomdebugOutput("failed to load material for Terrain");
+	FileLogger::Get().LogError("failed to load material for Terrain");
 	myTerrain->LoadCustomShaders(*myGraphicsEnginePtr, "../Assets/Shaders/TerrainMaterialShader_PS.cso", "../Assets/Shaders/MaterialShader_VS.cso");
-	TGPUtilities::CustomdebugOutput("failed to initialize Terrain");
+	FileLogger::Get().LogError("failed to initialize Terrain");
 	myTerrain->myTransform.SetTransform({ 0, 0.0f, 0 }, { 0, 0, 0 }, { 1,1,1 });
 
 	return true;

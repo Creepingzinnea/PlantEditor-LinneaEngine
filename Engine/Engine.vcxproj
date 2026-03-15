@@ -189,6 +189,7 @@
     <ClInclude Include="Source\BufferData.h" />
     <ClInclude Include="Source\Camera.h" />
     <ClInclude Include="Source\DDSTextureLoader11.h" />
+    <ClInclude Include="Source\FileLogger.h" />
     <ClInclude Include="Source\GraphicsEngine.h" />
     <ClInclude Include="Source\ImguiInterface.h" />
     <ClInclude Include="Source\Light.h" />
@@ -221,6 +222,7 @@
     <ClCompile Include="Source\Camera.cpp" />
     <ClCompile Include="Source\DDSTextureLoader11.cpp" />
     <ClCompile Include="Source\Engine.cpp" />
+    <ClCompile Include="Source\FileLogger.cpp" />
     <ClCompile Include="Source\GraphicsEngine.cpp" />
     <ClCompile Include="Source\ImguiInterface.cpp" />
     <ClCompile Include="Source\Material.cpp" />
