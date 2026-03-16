@@ -8,9 +8,10 @@
 #include <WindowHandler.h>
 #include <imgui_docking/imgui.h>
 #include <FileLogger.h>
+#include <sstream>
+#include <iostream>
 #include "Main.h"
 #include "World.h"
-#include "TGPUtilities.hpp"
 #include "ImguiInterface.h"
 #include "Random.h"
 
@@ -33,7 +34,6 @@ void HandleInput(MSG& aMsg, CommonUtilities::InputManager* aInputmanager, bool& 
 
 		TranslateMessage(&aMsg);
 		DispatchMessage(&aMsg);
-		DefWindowProc(*WindowHandler::GetInstance().GetWindowHandle(), aMsg.message, aMsg.wParam, aMsg.lParam);
 	}
 }
 #pragma endregion //HandleInput function
@@ -45,8 +45,10 @@ LONG WINAPI TopLevelExceptionHandler(EXCEPTION_POINTERS* pExceptionInfo)
 		DWORD code = pExceptionInfo->ExceptionRecord->ExceptionCode;
 		void* addr = pExceptionInfo->ExceptionRecord->ExceptionAddress;
 
-		FileLogger::Get().LogError("Program crashed! Exception code: 0x" +std::to_string(code) +
-			", Address: " +std::to_string(reinterpret_cast<uintptr_t>(addr)));
+		std::stringstream ss;
+		ss << "Program crashed! Exception code: 0x" << std::hex << code << ", Address: 0x" << addr;
+
+		FileLogger::Get().LogError(ss.str());
 		FileLogger::Get().Flush();
 	}
 	else
@@ -77,7 +79,7 @@ int APIENTRY wWinMain//---------------------------------------------------------
 		freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
 		freopen_s((FILE**)stderr, "CONOUT$", "w", stderr);
 		freopen_s((FILE**)stdin, "CONIN$", "r", stdin);
-		std::cout << "Debug" << std::endl;
+		std::cout << "Running Engine in debug build" << std::endl;
 #endif
 
 		//timer and input and utilities
@@ -111,6 +113,7 @@ int APIENTRY wWinMain//---------------------------------------------------------
 		else
 		{
 			FileLogger::Get().LogError("graphics-engine initialization failed.");
+			return -1;
 		}
 
 		//imgui
@@ -123,6 +126,7 @@ int APIENTRY wWinMain//---------------------------------------------------------
 		else
 		{
 			FileLogger::Get().LogError("ImGui initialization failed");
+			return -1;
 		}
 
 		//game world
@@ -136,6 +140,7 @@ int APIENTRY wWinMain//---------------------------------------------------------
 		else
 		{
 			FileLogger::Get().LogError("game-world initialization failed.");
+			return -1;
 		}
 
 		// Main loop-------------------------------------------------------------------------------------

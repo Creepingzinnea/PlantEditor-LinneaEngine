@@ -5,25 +5,41 @@
 class FileLogger
 {
 public:
-    static FileLogger& Get();
-    void Log(const std::string& message);
-    void LogWarning(const std::string& message);
-    void LogError(const std::string& message);
-    void Flush();
-    std::string GetDateStamp();
+
+	static FileLogger& Get();
+
+	void Log(const std::string& message);
+	void LogWarning(const std::string& message);
+	void LogError(const std::string& message);
+	void Log(const std::string& message, unsigned long aHresult);
+	void LogWarning(const std::string& message, unsigned long aHresult);
+	void LogError(const std::string& message, unsigned long aHresult);
+
+	void Flush();
 
 private:
-    std::string Timestamp();
-    void Initialize();
+	enum class eWarningLevel
+	{
+		Info = 0,
+		Warning = 1,
+		Error = 2
+	};
 
-    FileLogger() = default;
-    ~FileLogger();
-    FileLogger(const FileLogger&) = delete;           
-    FileLogger& operator=(const FileLogger&) = delete; 
+	void Log(const eWarningLevel aWarningLevel, const std::string& message);
+	void LogHRESULT(const eWarningLevel aWarningLevel, const std::string& message, unsigned long aHresult);
+	std::string GetDateStamp();
+	std::string Timestamp();
+	void Initialize();
+	std::string BuildHresultMessage(unsigned long aHresult);
 
-    std::string myFile = "../log.txt";
-    std::ofstream myLog;
+	FileLogger() = default;
+	~FileLogger();
+	FileLogger(const FileLogger&) = delete;
+	FileLogger& operator=(const FileLogger&) = delete;
 
-    bool myIsInitialized = false;
+	std::string myFilePath = "";
+	std::ofstream myLog;
+
+	bool myIsInitialized = false;
 };
 

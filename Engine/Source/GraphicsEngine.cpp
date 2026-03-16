@@ -7,9 +7,8 @@
 #include "Timer.h"
 #include "WaterPlane.h"
 #include "BufferData.h"
+#include "WindowHandler.h"
 #include <InputManager.h>
-
-#define REPORT_DX_WARNINGS
 
 bool GraphicsEngine::Initialize(CommonUtilities::Timer* aTimerPtr)
 {
@@ -110,7 +109,7 @@ bool GraphicsEngine::PreFrame()
 
 	if (FAILED(result))
 	{
-		FileLogger::Get().LogError("ReziseBuffers failed.");
+		FileLogger::Get().LogError("ReziseBuffers failed.", result);
 		FileLogger::Get().Flush();
 		return false;
 	}
@@ -118,7 +117,7 @@ bool GraphicsEngine::PreFrame()
 	// Recreate the back buffer
 	if (!CreateBackBuffer())
 	{
-		FileLogger::Get().LogError("CreateBackBuffer failed");
+		FileLogger::Get().LogError("CreateBackBuffer failed", result);
 		FileLogger::Get().Flush();
 		return false;
 	}
@@ -126,7 +125,7 @@ bool GraphicsEngine::PreFrame()
 	// Recreate depth buffer with new size
 	if (!CreateDepthBuffer())
 	{
-		FileLogger::Get().LogError("CreateDepthBuffer failed");
+		FileLogger::Get().LogError("CreateDepthBuffer failed", result);
 		FileLogger::Get().Flush();
 		return false;
 	}
@@ -138,7 +137,7 @@ bool GraphicsEngine::PreFrame()
 	if (!CreateRenderTarget(&myIntermediateRenderTarget) ||
 		!CreateRenderTarget(&myMainRenderTarget))
 	{
-		FileLogger::Get().LogError("CreateRenderTarget failed");
+		FileLogger::Get().LogError("CreateRenderTarget failed", result);
 		FileLogger::Get().Flush();
 		return false;
 	}
@@ -163,7 +162,7 @@ bool GraphicsEngine::CreateBlendStates()
 	HRESULT result = myDevice->CreateBlendState(&blendDesc, myAlphaBlendState.GetAddressOf());
 	if (FAILED(result))
 	{
-		FileLogger::Get().LogError("Failed to create alpha blend state. HRESULT: " + std::to_string(result));
+		FileLogger::Get().LogError("Failed to create alpha blend state", result);
 		FileLogger::Get().Flush();
 		return false;
 	}
@@ -183,7 +182,7 @@ bool GraphicsEngine::CreateBlendStates()
 	result = myDevice->CreateBlendState(&opaqueBlendDesc, myOpaqueBlendState.GetAddressOf());
 	if (FAILED(result))
 	{
-		FileLogger::Get().LogError("Failed to create opaque blend state. HRESULT: " + std::to_string(result));
+		FileLogger::Get().LogError("Failed to create opaque blend state", result);
 		FileLogger::Get().Flush();
 		return false;
 	}
@@ -213,7 +212,7 @@ bool GraphicsEngine::CreateRenderTarget(RenderTarget* aRenderTarget)
 	result = myDevice->CreateTexture2D(&desc, nullptr, &texture);
 	if (!SUCCEEDED(result))
 	{
-		FileLogger::Get().LogError("Failed to create render target. HRESULT: " + std::to_string(result));
+		FileLogger::Get().LogError("Failed to create render target" , result);
 		FileLogger::Get().Flush();
 		return false;
 	}
@@ -228,7 +227,7 @@ bool GraphicsEngine::CreateRenderTarget(RenderTarget* aRenderTarget)
 
 	if (!SUCCEEDED(result))
 	{
-		FileLogger::Get().LogError("Failed to create shader resource view for render target. HRESULT: " + std::to_string(result));
+		FileLogger::Get().LogError("Failed to create shader resource view for render target", result);
 		FileLogger::Get().Flush();
 		return false;
 	}
@@ -242,7 +241,7 @@ bool GraphicsEngine::CreateRenderTarget(RenderTarget* aRenderTarget)
 
 	if (!SUCCEEDED(result))
 	{
-		FileLogger::Get().LogError("Failed to create render target view for render target. HRESULT: " + std::to_string(result));
+		FileLogger::Get().LogError("Failed to create render target view for render target", result);
 		FileLogger::Get().Flush();
 		return false;
 	}
@@ -283,7 +282,7 @@ void GraphicsEngine::RenderWithReflection(const std::vector<std::shared_ptr<Mesh
 		frameBufferData.directionalLightDirection = myDirectionalLight.direction;
 		frameBufferData.ambientLightColorAndIntensity = myAmbientLight.colorAndIntensity;
 		frameBufferData.cameraPosition = myCamera->myTransform.GetTranslation();
-		frameBufferData.resolution = { WindowHandler::GetInstance().GetWidth(), WindowHandler::GetInstance().GetWidth() };
+		frameBufferData.resolution = { WindowHandler::GetInstance().GetWidth(), WindowHandler::GetInstance().GetHeight() };
 		frameBufferData.deltaTime = static_cast<float>(myTimerPtr->GetDeltaTime());
 		frameBufferData.totalTime = static_cast<float>(myTimerPtr->GetTotalTime());
 		frameBufferData.clipHeight = aWaterPlane->myTransform.GetTranslation().y;
@@ -448,7 +447,7 @@ void GraphicsEngine::PresentFrame()
 	HRESULT result = mySwapChain->Present(1, 0);
 	if (FAILED(result))
 	{
-		FileLogger::Get().LogWarning("Failed to present the swap chain. HRESULT: " + std::to_string(result));
+		FileLogger::Get().LogWarning("Failed to present the swap chain", result);
 		FileLogger::Get().Flush();
 	}
 
@@ -474,7 +473,7 @@ bool GraphicsEngine::InitializeSwapChain(HWND windowHandle)
 
 	UINT creationFlags = 0;
 
-#if defined(REPORT_DX_WARNINGS)
+#if _DEBUG
 	creationFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
@@ -496,7 +495,7 @@ bool GraphicsEngine::InitializeSwapChain(HWND windowHandle)
 
 	if (FAILED(result))
 	{
-		FileLogger::Get().LogError("D3D11CreateDeviceAndSwapChain failed. HRESULT: " + std::to_string(result));
+		FileLogger::Get().LogError("D3D11CreateDeviceAndSwapChain failed", result);
 		return false;
 	}
 
@@ -509,7 +508,7 @@ bool GraphicsEngine::CreateBackBuffer()
 	HRESULT result = mySwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backBufferTexture);
 	if (FAILED(result))
 	{
-		FileLogger::Get().LogError("GetBuffer failed. HRESULT: " + std::to_string(result));
+		FileLogger::Get().LogError("GetBuffer failed", result);
 		FileLogger::Get().Flush();
 		return false;
 	}
@@ -532,7 +531,7 @@ bool GraphicsEngine::CreateConstantBuffers()
 	HRESULT result = myDevice->CreateBuffer(&bufferDescription, nullptr, &myFrameBuffer);
 	if (FAILED(result))
 	{
-		FileLogger::Get().LogError("Failed to create frame buffer. HRESULT: " + std::to_string(result));
+		FileLogger::Get().LogError("Failed to create frame buffer", result);
 		FileLogger::Get().Flush();
 		return false;
 	}
@@ -541,7 +540,7 @@ bool GraphicsEngine::CreateConstantBuffers()
 	result = myDevice->CreateBuffer(&bufferDescription, nullptr, &myObjectBuffer);
 	if (FAILED(result))
 	{
-		FileLogger::Get().LogError("Failed to create object buffer. HRESULT: " + std::to_string(result));
+		FileLogger::Get().LogError("Failed to create object buffer", result);
 		FileLogger::Get().Flush();
 		return false;
 	}
@@ -550,7 +549,7 @@ bool GraphicsEngine::CreateConstantBuffers()
 	result = myDevice->CreateBuffer(&bufferDescription, nullptr, &myTerrainBuffer);
 	if (FAILED(result))
 	{
-		FileLogger::Get().LogError("Failed to create terrain buffer. HRESULT: " + std::to_string(result));
+		FileLogger::Get().LogError("Failed to create terrain buffer", result);
 		FileLogger::Get().Flush();
 		return false;
 	}
@@ -572,7 +571,7 @@ bool GraphicsEngine::CreateSamplerState()
 	HRESULT result = myDevice->CreateSamplerState(&samplerDesc, &mySamplerState);
 	if (FAILED(result))
 	{
-		FileLogger::Get().LogError("Failed to create sampler state. HRESULT: " + std::to_string(result));
+		FileLogger::Get().LogError("Failed to create sampler state", result);
 		FileLogger::Get().Flush();
 		return false;
 	}
@@ -594,7 +593,7 @@ bool GraphicsEngine::CreateDepthBuffer()
 	HRESULT result = myDevice->CreateTexture2D(&depthBufferDesc, nullptr, &depthBufferTexture);
 	if (FAILED(result))
 	{
-		FileLogger::Get().LogError("Failed to create texture 2D. HRESULT: " + std::to_string(result));
+		FileLogger::Get().LogError("Failed to create texture 2D", result);
 		FileLogger::Get().Flush();
 		return false;
 	}
@@ -603,7 +602,7 @@ bool GraphicsEngine::CreateDepthBuffer()
 	depthBufferTexture->Release();
 	if (FAILED(result))
 	{
-		FileLogger::Get().LogError("Failed to create depth stencil view. HRESULT: " + std::to_string(result));
+		FileLogger::Get().LogError("Failed to create depth stencil view", result);
 		FileLogger::Get().Flush();
 		return false;
 	}
@@ -640,7 +639,7 @@ bool GraphicsEngine::CreateRasterizerStates()
 	);
 	if (FAILED(result))
 	{
-		FileLogger::Get().LogError("Failed to create front face culling razterizer state. HRESULT: " + std::to_string(result));
+		FileLogger::Get().LogError("Failed to create front face culling razterizer state", result);
 		FileLogger::Get().Flush();
 		return false;
 	}
@@ -655,7 +654,7 @@ bool GraphicsEngine::CreateRasterizerStates()
 	);
 	if (FAILED(result))
 	{
-		FileLogger::Get().LogError("Failed to create back face culling razterizer state. HRESULT: " + std::to_string(result));
+		FileLogger::Get().LogError("Failed to create back face culling razterizer state", result);
 		FileLogger::Get().Flush();
 		return false;
 	}
@@ -670,7 +669,7 @@ bool GraphicsEngine::CreateRasterizerStates()
 	);
 	if (FAILED(result))
 	{
-		FileLogger::Get().LogError("Failed to create no face culling razterizer state. HRESULT: " + std::to_string(result));
+		FileLogger::Get().LogError("Failed to create no face culling razterizer state", result);
 		FileLogger::Get().Flush();
 		return false;
 	}
@@ -690,7 +689,7 @@ void GraphicsEngine::PrepareFrameBufferData(float aClipHeight)
 	frameBufferData.directionalLightDirection = myDirectionalLight.direction;
 	frameBufferData.ambientLightColorAndIntensity = myAmbientLight.colorAndIntensity;
 	frameBufferData.cameraPosition = myCamera->myTransform.GetTranslation();
-	frameBufferData.resolution = { WindowHandler::GetInstance().GetWidth(), WindowHandler::GetInstance().GetWidth() };
+	frameBufferData.resolution = { WindowHandler::GetInstance().GetWidth(), WindowHandler::GetInstance().GetHeight() };
 	frameBufferData.deltaTime = static_cast<float>(myTimerPtr->GetDeltaTime());
 	frameBufferData.totalTime = static_cast<float>(myTimerPtr->GetTotalTime());
 	frameBufferData.clipHeight = aClipHeight;
@@ -733,7 +732,7 @@ void GraphicsEngine::PrepareTerrainBufferData(TerrainBuffer* someTerrainData)
 	}
 	else
 	{
-		FileLogger::Get().LogWarning("Failed to map terrain buffer. HRESULT: " + std::to_string(result));
+		FileLogger::Get().LogWarning("Failed to map terrain buffer", result);
 		FileLogger::Get().Flush();
 	}
 }
@@ -748,7 +747,7 @@ bool GraphicsEngine::CreateDepthStencilStates()
 	HRESULT result = myDevice->CreateDepthStencilState(&defaultDesc, myDefaultDepthStencilState.GetAddressOf());
 	if (FAILED(result))
 	{
-		FileLogger::Get().LogError("Failed to create default depth stencil state. HRESULT: " + std::to_string(result));
+		FileLogger::Get().LogError("Failed to create default depth stencil state", result);
 		FileLogger::Get().Flush();
 		return false;
 	}
@@ -762,7 +761,7 @@ bool GraphicsEngine::CreateDepthStencilStates()
 	result = myDevice->CreateDepthStencilState(&readOnlyDesc, myReadOnlyDepthStencilState.GetAddressOf());
 	if (FAILED(result))
 	{
-		FileLogger::Get().LogError("Failed to create read only depth stencil state. HRESULT: " + std::to_string(result));
+		FileLogger::Get().LogError("Failed to create read only depth stencil state", result);
 		FileLogger::Get().Flush();
 		return false;
 	}

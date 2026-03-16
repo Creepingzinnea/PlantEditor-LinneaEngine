@@ -5,3 +5,6 @@ x86/
 *.idb
 *vcxproj.user
 Log*.txt
+*Game_Debug.exe
+*.cso
+*imgui.ini

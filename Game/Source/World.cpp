@@ -72,9 +72,7 @@ bool World::Init(GraphicsEngine& aGraphicsEngine)
 	//rest of terrain
 	terrainThread.join();
 	myTerrain->LoadMaterial(myGraphicsEnginePtr);
-	FileLogger::Get().LogError("failed to load material for Terrain");
 	myTerrain->LoadCustomShaders(*myGraphicsEnginePtr, "../Assets/Shaders/TerrainMaterialShader_PS.cso", "../Assets/Shaders/MaterialShader_VS.cso");
-	FileLogger::Get().LogError("failed to initialize Terrain");
 	myTerrain->myTransform.SetTransform({ 0, 0.0f, 0 }, { 0, 0, 0 }, { 1,1,1 });
 
 	return true;
